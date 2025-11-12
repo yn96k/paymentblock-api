@@ -1,0 +1,187 @@
+openapi: 3.0.1
+info:
+  title: Сервис блокировки платежей юридических лиц API
+  version: '1.0'
+
+components:
+  securitySchemes:
+    paymentsOAuth2:
+      type: oauth2
+      description: Аутентификация
+      flows:
+        authorizationCode:
+          authorizationUrl: https://test-tbank.com/oauth2/authorize
+          tokenUrl: https://test-tbank.com/oauth2/token
+          scopes:
+            view_block_status: View client block status
+            unblock_client: Unblock client payments
+            block_client: Block client payments
+  responses:
+    ClientNotFound:
+      description: Клиент с указанным UUID не найден.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              errorCode:
+                type: string
+                example: CLIENT_NOT_FOUND
+              message:
+                type: string
+                example: Клиент с ID '1111-2222-aaaa-bbbbbbbb' не найден.
+              status:
+                type: integer
+                example: 404
+    NoAccessGranted:
+      description: У оператора нет прав на совершение данного действия.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success:
+                type: boolean
+                example: false
+              errorCode:
+                type: string
+                example: NO_ACCESS_GRANTED
+              message:
+                type: string
+                example: У оператора с ID 'aaaa-bbbb-cccc-1111111' нет прав на совершение данного действия.
+              status:
+                type: integer
+                example: 404            
+security:
+  - paymentsOAuth2:
+      - view_block_status
+      - unblock_client
+      - block_client
+
+paths:
+  /clients/{client_id}/block:
+    post:
+      summary: Заблокировать платежи клиента
+      security:
+        - paymentsOAuth2:
+            - block_client
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          description: Уникальный ключ идемпотентности запроса
+          schema:
+            type: string
+        - name: client_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Тип блокировки и причина
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                block_type:
+                  type: string
+                  description: "Тип блокировки. Доступные значения: suspicion - подозрение на мошенничество, details_mismatch - неверные реквизиты. (прим. enum не использовал для легкой мастабируемости, так как могут появиться новые причины)"
+                comment:
+                  type: string
+                  description: Комментарий к блокировке
+      responses:
+        '200':
+          description: Клиент заблокирован
+        '401':
+          $ref: '#/components/responses/NoAccessGranted'
+        '404':
+          $ref: '#/components/responses/ClientNotFound'
+
+            
+  /clients/{client_id}/unblock:
+    post:
+      summary: Разблокировать платежи клиента
+      security:
+        - paymentsOAuth2:
+            - unblock_client
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          description: Уникальный ключ идемпотентности запроса
+          schema:
+            type: string
+        - name: client_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        description: Комментарий к разблокировке
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comment:
+                  type: string
+                  description: Причина или комментарий к разблокировке
+      responses:
+        '200':
+          description: Клиент разблокирован
+        '401':
+          $ref: '#/components/responses/NoAccessGranted'
+        '404':
+          $ref: '#/components/responses/ClientNotFound'
+
+  /clients/{client_id}/block_status:
+    get:
+      summary: Получить статус блокировки клиента
+      security:
+        - paymentsOAuth2:
+            - view_block_status
+      parameters:
+        - name: client_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Текущий статус блокировки
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  is_blocked:
+                    type: boolean
+                    description: Статус блокировки
+                  block_type:
+                    type: string
+                    nullable: true
+                    description: "Тип блокировки. Доступные значения: suspicion - подозрение на мошенничество, details_mismatch - неверные реквизиты."
+                  blocked_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    description: Время блокировки. Если не заблокирован - значение Null
+                  unblocked_at:
+                    type: string
+                    format: date-time
+                    nullable: true
+                    description: Время блокировки. Если не разблокирован или не блокировался - значение Null
+                  comment:
+                    type: string
+                    nullable: true
+        '401':
+          $ref: '#/components/responses/NoAccessGranted'
+        '404':
+          $ref: '#/components/responses/ClientNotFound'
