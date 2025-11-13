@@ -8,7 +8,7 @@ paths:
   /clients/{client_id}/block:
     post:
       tags:
-        - clientPaymentsBlock
+        - clientPayments
       summary: Заблокировать платежи клиента
       description: Метод для блокировки платежей клиента
       operationId: blockProfile
@@ -32,11 +32,13 @@ paths:
           $ref: '#/components/responses/Error'
         404:
           $ref: '#/components/responses/Error'
-            
+        500:
+          $ref: '#/components/responses/Error'
+          
   /clients/{client_id}/unblock:
     post:
       tags:
-        - clientPaymentsUnblock
+        - clientPayments
       summary: Разблокировать платежи клиента
       description: Метод для разблокировки платежей клиента
       operationId: unblockProfile
@@ -53,11 +55,13 @@ paths:
           $ref: '#/components/responses/Error'
         404:
           $ref: '#/components/responses/Error'
+        500:
+          $ref: '#/components/responses/Error'
 
   /clients/{client_id}/block_status:
     get:
       tags:
-        - getBlockStatus
+        - clientPayments
       summary: Получить статус блокировки клиента
       description: Метод для получения статуса блокировки клиента
       operationId: blockStatusProfile
@@ -76,6 +80,8 @@ paths:
         401:
           $ref: '#/components/responses/Error'
         404:
+          $ref: '#/components/responses/Error'
+        500:
           $ref: '#/components/responses/Error'
           
 security:
@@ -121,40 +127,51 @@ components:
   schemas:
     
     BlockStatus:
+      required:
+        - clientId
+        - isBlocked
+        - blockedAt
+        - blockType
       type: object
       properties:
-        client_id:
+        clientId:
           type: string
           format: uuid
-          nullable: false
           description: UUID клиента
-        is_blocked:
+        isBlocked:
           type: boolean
-          nullable: false
           description: Статус блокировки
-        block_type:
-          type: number
-          nullable: true
-          description: Тип блокировки (block_type_id)
-        blocked_at:
+        blockedAt:
           type: string
           format: date-time
-          nullable: true
           description: Дата и время блокировки
+        blockType: 
+          $ref: '#/components/schemas/BlockType'
         comment:
-          type: string
-          nullable: true
-          description: Комментарий модератора
-    
+          $ref: '#/components/schemas/Comment'
+        
     BlockProfile:
+      required:
+      - blockType
       type: object
       properties:
-        block_type:
-          type: string
-          description: Тип блокировки
+        blockType: 
+          $ref: '#/components/schemas/BlockType'
         comment:
-          type: string
-          description: Комментарий к блокировке
+          $ref: '#/components/schemas/Comment'
+
+    BlockType:
+      type: string
+      enum:
+        - suspicious
+        - invalid
+      description: Тип блокировки
+      example: suspicious
+    
+    Comment:
+      type: string
+      description: Комментарий к блокировке
+      example: 100 переводов за 2 секунды
     
     ErrorResponse: 
       description: Ответ сервера с ошибкой 
