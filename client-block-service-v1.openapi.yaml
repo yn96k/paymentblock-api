@@ -141,6 +141,10 @@ components:
           format: date-time
           nullable: true
           description: Дата и время блокировки
+        comment:
+          type: string
+          nullable: true
+          description: Комментарий модератора
     
     BlockProfile:
       type: object
