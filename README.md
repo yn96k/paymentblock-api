@@ -5,7 +5,7 @@
 ### 1. Блокировка клиента
 POST /clients/{client_id}/block <br>
 Параметры requestbody:
-- block_type_id - ID причины блокировки
+- block_type_name - Название причины блокировки
 - comment - Комментарий модератора
 
 Алгоритм сервиса при вызове запроса:
@@ -65,7 +65,8 @@ WHERE client_id = {client_id}
 |client_id|VARCHAR(36) PK|UUID клиента|
 |client_name|VARCHAR(30) NOT NULL|Название юридического лица|
 |ogrn|DECIMAL(13) NOT NULL|ОГРН организации|
-|is_blocked|BOOLEAN NOT NULL|Статус блокировки клиента|
+|block_type|VARCHAR(30) NOT NULL|Название причины блокировки|
+|blocked_at|TIMESTAMP NOT NULL|Дата и время блокировки|
 
 Так как запросы приходят по client_id, целесообразно индексировать это поле:
 
