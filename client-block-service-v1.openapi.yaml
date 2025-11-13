@@ -123,15 +123,24 @@ components:
     BlockStatus:
       type: object
       properties:
+        client_id:
+          type: string
+          format: uuid
+          nullable: false
+          description: UUID клиента
+        is_blocked:
+          type: boolean
+          nullable: false
+          description: Статус блокировки
         block_type:
           type: number
-          nullable: false
+          nullable: true
           description: Тип блокировки (block_type_id)
         blocked_at:
           type: string
           format: date-time
-          nullable: false
-          description: Дата и время блокировки.
+          nullable: true
+          description: Дата и время блокировки
     
     BlockProfile:
       type: object
