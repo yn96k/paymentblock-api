@@ -5,7 +5,7 @@
    
 |Имя атрибута|Тип данных|Описание|
 |:----|:----|:----|
-|client_id|CHAR(36) PK|UUID клиента|
+|client_id|VARCHAR(36) PK|UUID клиента|
 |client_name|VARCHAR(30) NOT NULL|Название юридического лица|
 |ogrn|DECIMAL(13) NOT NULL|ОГРН организации|
 |account_num|DECIMAL(20) NOT NULL|Расчетный счет клиента|
