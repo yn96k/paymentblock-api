@@ -26,12 +26,12 @@
 |block_type_name|VARCHAR(30) NOT NULL|Название причины блокировки|
 
 
-### 3. Таблица block
+### 3. Таблица client_block
 Хранит список всех заблокированных на данный момент клиентов. Если клиент разблокирован, строка с его UUID удаляется из таблицы.
    
 |Имя атрибута|Тип данных|Описание|
 |:----|:----|:----|
-|block_id|INT PK AUTO_INCREMENT|ID блокировки|
+|client_block_id|INT PK AUTO_INCREMENT|ID блокировки|
 |client_id|CHAR(36) FK client(client_id) UNIQUE|UUID клиента|
 |block_type_id|INT FK block_type(block_type_id)|ID причины блокировки|
 |blocked_at|TIMESTAMP|Дата и время блокировки|
